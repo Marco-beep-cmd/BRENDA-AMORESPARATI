@@ -1,0 +1,1191 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Una Historia de Amor</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Cormorant+Garamond:ital,wght@0,300;0,400;1,300;1,400&family=Playfair+Display:ital,wght@0,400;1,400&family=Josefin+Sans:wght@100;200;300&display=swap" rel="stylesheet">
+
+<style>
+/* ============================================================
+   RESET & BASE
+   ============================================================ */
+*, *::before, *::after { margin: 0; padding: 0; box-sizing: border-box; }
+html, body { width: 100%; height: 100%; overflow: hidden; background: #000; }
+
+/* ============================================================
+   CSS VARIABLES — PALETA ROMÁNTICA
+   ============================================================ */
+:root {
+  --red:        #c0392b;
+  --red-glow:   #e74c3c;
+  --rose:       #e8a0b4;
+  --deep-blue:  #0a0e1a;
+  --mid-blue:   #0d1f3c;
+  --sky:        #1a3a6e;
+  --gold:       #d4a96a;
+  --cream:      #f5ede0;
+  --white-soft: rgba(255,255,255,0.92);
+  --glass:      rgba(255,255,255,0.07);
+  --glass-border: rgba(255,255,255,0.15);
+}
+
+/* ============================================================
+   PANTALLA DE INICIO — TAP TO BEGIN
+   ============================================================ */
+#startScreen {
+  position: fixed; inset: 0; z-index: 200;
+  background: #000;
+  display: flex; align-items: center; justify-content: center;
+  cursor: pointer;
+  transition: opacity 1.2s ease;
+}
+#startScreen.hidden {
+  opacity: 0;
+  pointer-events: none;
+}
+
+.start-inner {
+  text-align: center;
+  animation: startPulse 2.2s ease-in-out infinite;
+}
+@keyframes startPulse {
+  0%,100% { transform: scale(1);   opacity: 0.7; }
+  50%      { transform: scale(1.06); opacity: 1; }
+}
+
+.start-heart {
+  font-size: clamp(3rem, 10vw, 5.5rem);
+  color: #c0392b;
+  text-shadow: 0 0 30px rgba(192,57,43,0.8), 0 0 60px rgba(192,57,43,0.4);
+  margin-bottom: 20px;
+  display: block;
+}
+
+.start-hint {
+  font-family: 'Josefin Sans', sans-serif;
+  font-size: clamp(0.75rem, 2.5vw, 1rem);
+  font-weight: 200;
+  letter-spacing: 0.4em;
+  text-transform: uppercase;
+  color: rgba(255,255,255,0.55);
+}
+
+/* ============================================================
+   SECCIÓN 1: INTRO — PANTALLA NEGRA + CORAZÓN
+   ============================================================ */
+#intro {
+  position: fixed; inset: 0; z-index: 100;
+  background: #000;
+  display: flex; align-items: center; justify-content: center;
+  transition: opacity 1.5s ease;
+}
+
+/* Canvas del corazón latiendo */
+#heartCanvas {
+  position: absolute; inset: 0;
+  width: 100%; height: 100%;
+}
+
+/* ============================================================
+   SECCIÓN 2: PAISAJE NOCTURNO
+   ============================================================ */
+#landscape {
+  position: fixed; inset: 0; z-index: 10;
+  opacity: 0;
+  transition: opacity 2s ease;
+}
+
+/* Canvas del paisaje — río, montañas, estrellas */
+#landscapeCanvas {
+  position: absolute; inset: 0;
+  width: 100%; height: 100%;
+}
+
+/* Partículas flotantes sobre el paisaje */
+#particleCanvas {
+  position: absolute; inset: 0;
+  width: 100%; height: 100%;
+  pointer-events: none;
+}
+
+/* Neblina con gradiente */
+.mist {
+  position: absolute; bottom: 0; left: 0; right: 0;
+  height: 35%;
+  background: linear-gradient(to top,
+    rgba(100,130,180,0.18) 0%,
+    rgba(180,160,210,0.08) 50%,
+    transparent 100%);
+  animation: mistDrift 8s ease-in-out infinite alternate;
+  pointer-events: none;
+}
+@keyframes mistDrift {
+  from { transform: translateX(-15px) scaleX(1.02); opacity: 0.6; }
+  to   { transform: translateX(15px)  scaleX(0.98); opacity: 1; }
+}
+
+/* ============================================================
+   LETREROS ROMÁNTICOS — GLASSMORPHISM FLOTANTE
+   ============================================================ */
+#signContainer {
+  position: fixed; inset: 0; z-index: 20;
+  display: flex; align-items: center; justify-content: center;
+  pointer-events: none;
+}
+
+.sign {
+  position: absolute;
+  text-align: center;
+  opacity: 0;
+  transform: translateY(30px) scale(0.95);
+  transition: opacity 1.2s ease, transform 1.2s ease;
+  animation: signFloat 4s ease-in-out infinite;
+}
+.sign.visible {
+  opacity: 1;
+  transform: translateY(0) scale(1);
+}
+.sign.hiding {
+  opacity: 0;
+  transform: translateY(-20px) scale(1.03);
+}
+
+@keyframes signFloat {
+  0%, 100% { margin-top: 0; }
+  50%       { margin-top: -10px; }
+}
+
+.sign-inner {
+  display: inline-block;
+  padding: 20px 44px;
+  background: rgba(255,255,255,0.06);
+  border: 1px solid rgba(255,255,255,0.18);
+  border-radius: 60px;
+  backdrop-filter: blur(18px) saturate(180%);
+  -webkit-backdrop-filter: blur(18px) saturate(180%);
+  box-shadow:
+    0 0 30px rgba(220,130,160,0.18),
+    0 0 60px rgba(100,120,200,0.10),
+    inset 0 1px 0 rgba(255,255,255,0.15);
+}
+
+.sign-text {
+  font-family: 'Cormorant Garamond', serif;
+  font-size: clamp(1.4rem, 3.5vw, 2.4rem);
+  font-style: italic;
+  font-weight: 300;
+  color: #fff;
+  letter-spacing: 0.04em;
+  text-shadow:
+    0 0 20px rgba(255,200,220,0.7),
+    0 0 40px rgba(200,160,220,0.4),
+    0 0 80px rgba(150,180,255,0.2);
+}
+
+/* ============================================================
+   SECCIÓN FINAL — "TENGO MÁS PARA DAR…"
+   ============================================================ */
+#finalSection {
+  position: fixed; inset: 0; z-index: 30;
+  display: flex; flex-direction: column;
+  align-items: center; justify-content: center;
+  gap: 48px;
+  opacity: 0;
+  pointer-events: none;
+  transition: opacity 2s ease;
+}
+
+#finalSection.visible {
+  opacity: 1;
+  pointer-events: auto;
+}
+
+.final-title {
+  font-family: 'Playfair Display', serif;
+  font-size: clamp(2rem, 6vw, 5rem);
+  font-style: italic;
+  color: #fff;
+  letter-spacing: 0.06em;
+  text-align: center;
+  animation: breatheGlow 3s ease-in-out infinite;
+  text-shadow:
+    0 0 20px rgba(255,255,255,0.9),
+    0 0 40px rgba(255,220,230,0.7),
+    0 0 80px rgba(255,180,210,0.5),
+    0 0 120px rgba(200,150,220,0.3);
+}
+@keyframes breatheGlow {
+  0%,100% { text-shadow:
+    0 0 20px rgba(255,255,255,0.9),
+    0 0 40px rgba(255,220,230,0.7),
+    0 0 80px rgba(255,180,210,0.5),
+    0 0 120px rgba(200,150,220,0.3); }
+  50% { text-shadow:
+    0 0 30px rgba(255,255,255,1),
+    0 0 60px rgba(255,220,230,0.9),
+    0 0 100px rgba(255,180,210,0.7),
+    0 0 160px rgba(200,150,220,0.5); }
+}
+
+.btn-click {
+  font-family: 'Josefin Sans', sans-serif;
+  font-size: 1rem;
+  font-weight: 200;
+  letter-spacing: 0.35em;
+  text-transform: uppercase;
+  color: rgba(255,255,255,0.9);
+  background: rgba(255,255,255,0.06);
+  border: 1px solid rgba(255,255,255,0.3);
+  padding: 18px 52px;
+  border-radius: 50px;
+  cursor: pointer;
+  backdrop-filter: blur(12px);
+  -webkit-backdrop-filter: blur(12px);
+  box-shadow: 0 0 30px rgba(255,180,210,0.2), inset 0 1px 0 rgba(255,255,255,0.15);
+  transition: all 0.4s ease;
+  animation: btnPulse 3s ease-in-out infinite;
+}
+.btn-click:hover {
+  background: rgba(255,255,255,0.12);
+  border-color: rgba(255,255,255,0.5);
+  box-shadow: 0 0 50px rgba(255,180,210,0.4), 0 0 80px rgba(200,150,220,0.25);
+  transform: scale(1.04);
+}
+@keyframes btnPulse {
+  0%,100% { box-shadow: 0 0 30px rgba(255,180,210,0.2), inset 0 1px 0 rgba(255,255,255,0.15); }
+  50%      { box-shadow: 0 0 50px rgba(255,180,210,0.35), 0 0 80px rgba(200,150,220,0.18); }
+}
+
+/* ============================================================
+   OVERLAY — CARTA DE AMOR
+   ============================================================ */
+#letterOverlay {
+  position: fixed; inset: 0; z-index: 50;
+  display: flex; align-items: center; justify-content: center;
+  background: rgba(5,5,15,0.75);
+  backdrop-filter: blur(6px);
+  -webkit-backdrop-filter: blur(6px);
+  opacity: 0;
+  pointer-events: none;
+  transition: opacity 0.8s ease;
+}
+#letterOverlay.open {
+  opacity: 1;
+  pointer-events: auto;
+}
+
+.letter-card {
+  position: relative;
+  width: min(680px, 92vw);
+  max-height: 88vh;
+  overflow-y: auto;
+  background: linear-gradient(160deg, #faf6ef 0%, #f5ede0 60%, #ede3d5 100%);
+  border-radius: 4px;
+  padding: 56px 60px 52px;
+  box-shadow:
+    0 40px 100px rgba(0,0,0,0.55),
+    0 0 0 1px rgba(200,170,120,0.25),
+    inset 0 0 60px rgba(212,169,106,0.06);
+  transform: scale(0.7) translateY(80px);
+  opacity: 0;
+  transition: transform 0.8s cubic-bezier(0.34,1.56,0.64,1), opacity 0.8s ease;
+  scrollbar-width: thin;
+  scrollbar-color: rgba(200,160,100,0.4) transparent;
+}
+.letter-card.open {
+  transform: scale(1) translateY(0);
+  opacity: 1;
+}
+
+/* Líneas decorativas de papel */
+.letter-card::before {
+  content: '';
+  position: absolute; inset: 0;
+  background-image: repeating-linear-gradient(
+    transparent, transparent 27px,
+    rgba(180,150,100,0.12) 28px
+  );
+  border-radius: inherit;
+  pointer-events: none;
+}
+
+/* Borde dorado sutil */
+.letter-card::after {
+  content: '';
+  position: absolute; inset: 8px;
+  border: 1px solid rgba(200,165,95,0.2);
+  border-radius: 2px;
+  pointer-events: none;
+}
+
+.letter-deco {
+  text-align: center;
+  font-size: 1.8rem;
+  color: rgba(180,130,80,0.5);
+  margin-bottom: 28px;
+  letter-spacing: 0.3em;
+}
+
+.letter-greeting {
+  font-family: 'Cormorant Garamond', serif;
+  font-size: 1.25rem;
+  font-style: italic;
+  color: #6b4c2a;
+  margin-bottom: 28px;
+  text-align: center;
+  letter-spacing: 0.05em;
+}
+
+.letter-body {
+  font-family: 'Cormorant Garamond', serif;
+  font-size: 1.08rem;
+  line-height: 1.95;
+  color: #4a3520;
+  font-weight: 400;
+}
+
+.letter-body p { margin-bottom: 1.2em; }
+
+.letter-body em {
+  font-style: italic;
+  color: #7a4f30;
+}
+
+.letter-signature {
+  font-family: 'Cormorant Garamond', serif;
+  font-size: 1.4rem;
+  font-style: italic;
+  color: #6b4c2a;
+  text-align: right;
+  margin-top: 32px;
+  padding-top: 20px;
+  border-top: 1px solid rgba(180,140,80,0.2);
+}
+
+.btn-play {
+  display: block;
+  margin: 36px auto 0;
+  font-family: 'Josefin Sans', sans-serif;
+  font-size: 0.85rem;
+  font-weight: 300;
+  letter-spacing: 0.3em;
+  color: #4a3520;
+  background: transparent;
+  border: 1px solid rgba(140,100,50,0.4);
+  padding: 14px 40px;
+  border-radius: 50px;
+  cursor: pointer;
+  transition: all 0.35s ease;
+}
+.btn-play:hover {
+  background: rgba(140,100,50,0.08);
+  border-color: rgba(140,100,50,0.7);
+  transform: scale(1.03);
+}
+
+/* ============================================================
+   SECCIÓN FINAL — VIDEO + OJITOS DE ANIMALES
+   ============================================================ */
+#videoSection {
+  position: fixed; inset: 0; z-index: 60;
+  background: transparent;
+  opacity: 0;
+  pointer-events: none;
+  transition: opacity 1.5s ease;
+}
+#videoSection.active {
+  opacity: 1;
+  pointer-events: auto;
+}
+
+#bgVideo {
+  position: absolute; inset: 0;
+  width: 100%; height: 100%;
+  object-fit: cover;
+  object-position: center center;
+  opacity: 1;
+}
+
+/* ojos removidos */
+
+/* video title removido */
+
+/* ============================================================
+   RESPONSIVE
+   ============================================================ */
+
+/* Tablets */
+@media (max-width: 768px) {
+  .letter-card       { padding: 40px 32px 44px; width: 94vw; }
+  .sign-inner        { padding: 14px 28px; }
+  .final-title       { font-size: clamp(1.6rem, 7vw, 3rem); }
+  .btn-click         { padding: 15px 36px; font-size: 0.85rem; }
+  .start-heart       { font-size: clamp(2.5rem, 12vw, 4rem); }
+  .video-title       { font-size: clamp(1rem, 4.5vw, 2rem); padding: 0 20px; }
+}
+
+/* Móviles */
+@media (max-width: 480px) {
+  .letter-card       { padding: 30px 20px 36px; width: 96vw; max-height: 92vh; }
+  .letter-body       { font-size: 1rem; line-height: 1.85; }
+  .letter-greeting   { font-size: 1.05rem; }
+  .letter-signature  { font-size: 1.15rem; }
+  .sign-inner        { padding: 12px 22px; }
+  .sign-text         { font-size: clamp(1.1rem, 5vw, 1.6rem); }
+  .final-title       { font-size: clamp(1.4rem, 8vw, 2.5rem); padding: 0 16px; text-align: center; }
+  .btn-click         { padding: 14px 28px; font-size: 0.78rem; letter-spacing: 0.25em; }
+  .btn-play          { padding: 12px 28px; font-size: 0.8rem; }
+  .start-hint        { font-size: clamp(0.65rem, 3vw, 0.85rem); }
+  .video-title       { font-size: clamp(0.9rem, 5vw, 1.6rem); padding: 0 16px; }
+}
+
+/* Móviles muy pequeños */
+@media (max-width: 360px) {
+  .letter-card  { padding: 24px 16px 28px; }
+  .final-title  { font-size: clamp(1.2rem, 9vw, 2rem); }
+}
+</style>
+</head>
+<body>
+
+<!-- ============================================================
+     HTML ESTRUCTURA — CAPAS APILADAS
+     ============================================================ -->
+
+<!-- ============================================================
+     PANTALLA DE INICIO — TAP TO BEGIN
+     Los navegadores bloquean autoplay con sonido; el usuario
+     debe interactuar primero. Esta pantalla actúa como "portal".
+     ============================================================ -->
+<div id="startScreen">
+  <div class="start-inner">
+    <div class="start-heart">♥</div>
+    <p class="start-hint">Toca para comenzar</p>
+  </div>
+</div>
+
+<!-- MÚSICA DE FONDO LOCAL — DESPACIO.mp3 -->
+<audio id="bgMusic" loop preload="auto" style="display:none;">
+  <source src="DESPACIO.mp3" type="audio/mpeg">
+</audio>
+
+<!-- CAPA 1: Intro con corazón latiendo -->
+<section id="intro">
+  <canvas id="heartCanvas"></canvas>
+</section>
+
+<!-- CAPA 2: Paisaje nocturno romántico -->
+<section id="landscape">
+  <canvas id="landscapeCanvas"></canvas>
+  <canvas id="particleCanvas"></canvas>
+  <div class="mist"></div>
+</section>
+
+<!-- CAPA 3: Letreros románticos flotantes -->
+<div id="signContainer">
+  <div class="sign" id="currentSign">
+    <div class="sign-inner">
+      <p class="sign-text" id="signText"></p>
+    </div>
+  </div>
+</div>
+
+<!-- CAPA 4: Sección final con texto luminoso -->
+<div id="finalSection">
+  <h1 class="final-title">Tengo más para dar…</h1>
+  <button class="btn-click" onclick="openLetter()">Haz clic aquí</button>
+</div>
+
+<!-- CAPA 5: Overlay carta de amor -->
+<div id="letterOverlay">
+  <article class="letter-card" id="letterCard">
+    <div class="letter-deco">✦ · · ✦ · · ✦</div>
+    <p class="letter-greeting">Para ti, que eres mi universo entero…</p>
+
+    <div class="letter-body">
+      <p>Hay personas que llegan a tu vida como llega el amanecer: sin anunciarse, sin pedir permiso, pero transformando todo lo que tocan. Tú eres ese tipo de presencia — suave, luminosa, inevitable.</p>
+
+      <p>No sé exactamente en qué momento dejaste de ser <em>alguien que conocí</em> y te convertiste en <em>alguien sin quien no me imagino</em>. Quizás fue en ese instante en que reíste de manera que el tiempo se detuvo un segundo. Quizás fue cuando, sin decir nada, entendiste exactamente lo que yo necesitaba escuchar.</p>
+
+      <p>Contigo descubrí que el amor no grita — <em>susurra</em>. Que no se demuestra solo en los gestos grandes, sino en la constancia de elegirte cada día, en cada conversación pequeña que guardo como un tesoro.</p>
+
+      <p>Eres mi lugar más tranquilo. En un mundo que nunca para, tú eres la pausa que me recuerda que respirar también es suficiente. Tu presencia sana cosas que yo no sabía que estaban rotas.</p>
+
+      <p>Quiero que sepas que <em>te volvería a elegir</em>. Con cada versión que hayas tenido, con cada momento difícil que hayas cargado. Te elegiría en el desorden, en la calma, en las noches largas y en las mañanas tranquilas.</p>
+
+      <p>No tengo palabras tan grandes como lo que siento. Pero si existiera una canción que pudiera abrazarte como yo quisiera hacerlo ahora mismo… sería esta.</p>
+    </div>
+
+    <p class="letter-signature">Con todo mi amor, siempre — <em>yo</em> 🤍</p>
+
+    <button class="btn-play" onclick="startVideo()">▶ &nbsp; Reproducir</button>
+  </article>
+</div>
+
+<!-- CAPA 6: Sección de video + ojitos -->
+<div id="videoSection">
+  <!-- Video local DEDICAR.mp4 — responsive, pantalla completa, sin fondo -->
+  <video id="bgVideo" loop playsinline muted
+    style="position:absolute;inset:0;width:100%;height:100%;object-fit:cover;object-position:center;opacity:1;">
+    <source src="DEDICAR.mp4" type="video/mp4">
+  </video>
+</div>
+
+<!-- ============================================================
+     JAVASCRIPT — MOTOR CINEMATOGRÁFICO
+     ============================================================ -->
+<script>
+/* ==========================================================
+   UTILIDADES GLOBALES
+   ========================================================== */
+const $ = id => document.getElementById(id);
+const lerp = (a, b, t) => a + (b - a) * t;
+const clamp = (v, mn, mx) => Math.min(Math.max(v, mn), mx);
+const rand = (a, b) => a + Math.random() * (b - a);
+
+/* Resize helper — mantiene canvas siempre al tamaño de pantalla */
+function resizeCanvas(canvas) {
+  canvas.width  = window.innerWidth;
+  canvas.height = window.innerHeight;
+}
+
+/* ==========================================================
+   SECCIÓN 1: CORAZÓN LATIENDO EN CANVAS
+   ========================================================== */
+const heartCanvas = $('heartCanvas');
+const hCtx = heartCanvas.getContext('2d');
+resizeCanvas(heartCanvas);
+
+/* Estado del corazón */
+const heart = {
+  scale:       0.15,      // Escala inicial pequeña
+  targetScale: 0.15,
+  baseSize:    Math.min(window.innerWidth, window.innerHeight) * 0.25,
+  beatPhase:   0,         // Fase del latido (0–1)
+  beatSpeed:   0.018,
+  glowRadius:  0,
+  done:        false,
+  expanding:   false,     // Fase de expansión final
+};
+
+/* Dibuja un corazón centrado usando curvas de Bézier */
+function drawHeart(ctx, cx, cy, size, fillColor, shadowColor, shadowBlur) {
+  ctx.save();
+  ctx.shadowBlur  = shadowBlur;
+  ctx.shadowColor = shadowColor;
+  ctx.beginPath();
+  const s = size / 30;
+  ctx.moveTo(cx, cy + s * 2);
+  ctx.bezierCurveTo(cx,       cy - s * 10, cx - s * 30, cy - s * 10, cx - s * 15, cy + s * 5);
+  ctx.bezierCurveTo(cx - s * 30, cy + s * 20, cx, cy + s * 30, cx, cy + s * 30);
+  ctx.bezierCurveTo(cx,       cy + s * 30, cx + s * 30, cy + s * 20, cx + s * 15, cy + s * 5);
+  ctx.bezierCurveTo(cx + s * 30, cy - s * 10, cx, cy - s * 10, cx, cy + s * 2);
+  ctx.closePath();
+  ctx.fillStyle = fillColor;
+  ctx.fill();
+  ctx.restore();
+}
+
+/* Audio sintético — latidos con Web Audio API */
+let audioCtx;
+function playHeartbeat() {
+  try {
+    if (!audioCtx) audioCtx = new (window.AudioContext || window.webkitAudioContext)();
+
+    function beat(delay, freq, dur) {
+      const osc  = audioCtx.createOscillator();
+      const gain = audioCtx.createGain();
+      osc.connect(gain);
+      gain.connect(audioCtx.destination);
+      osc.frequency.value = freq;
+      osc.type = 'sine';
+      const t = audioCtx.currentTime + delay;
+      gain.gain.setValueAtTime(0, t);
+      gain.gain.linearRampToValueAtTime(0.25, t + 0.02);
+      gain.gain.exponentialRampToValueAtTime(0.001, t + dur);
+      osc.start(t);
+      osc.stop(t + dur);
+    }
+    // Doble golpe de corazón: lub-dub
+    beat(0,    70, 0.08);
+    beat(0.10, 55, 0.12);
+  } catch(e) {}
+}
+
+/* Bucle de animación del corazón */
+let heartBeatCount = 0;
+let lastBeatTime   = 0;
+const BEATS_BEFORE_EXPAND = 7;
+
+function animateHeart(now = 0) {
+  if (heart.done) return;
+
+  const W = heartCanvas.width;
+  const H = heartCanvas.height;
+  const cx = W / 2;
+  const cy = H / 2;
+
+  hCtx.clearRect(0, 0, W, H);
+  hCtx.fillStyle = '#000';
+  hCtx.fillRect(0, 0, W, H);
+
+  heart.beatPhase += heart.beatSpeed;
+
+  /* Cada ciclo completo es un latido */
+  if (heart.beatPhase >= 1) {
+    heart.beatPhase = 0;
+    heartBeatCount++;
+
+    if (heartBeatCount <= BEATS_BEFORE_EXPAND) {
+      playHeartbeat();
+      /* Crecimiento gradual con cada latido */
+      heart.baseSize *= 1.12;
+    }
+
+    if (heartBeatCount === BEATS_BEFORE_EXPAND) {
+      heart.expanding = true;
+    }
+  }
+
+  /* Pulso suave tipo sinusoidal */
+  const pulse    = Math.sin(heart.beatPhase * Math.PI * 2) * 0.08 + 1;
+  const currentS = heart.baseSize * pulse * heart.scale;
+
+  if (!heart.expanding) {
+    /* Crecimiento suave del corazón con cada latido */
+    heart.scale = lerp(heart.scale, 1, 0.003);
+
+    /* Glow pulsante */
+    const glowAmt = (Math.sin(heart.beatPhase * Math.PI * 2) + 1) * 0.5;
+    const glow    = 20 + glowAmt * 60;
+
+    /* Capa exterior de glow difuso */
+    const grad = hCtx.createRadialGradient(cx, cy, 0, cx, cy, heart.baseSize * heart.scale * 1.5);
+    grad.addColorStop(0,   `rgba(200,30,40,${0.15 * glowAmt})`);
+    grad.addColorStop(0.5, `rgba(180,20,30,${0.08 * glowAmt})`);
+    grad.addColorStop(1,   'transparent');
+    hCtx.fillStyle = grad;
+    hCtx.fillRect(0, 0, W, H);
+
+    drawHeart(hCtx, cx, cy, currentS, '#c0392b', '#e74c3c', glow);
+
+    /* Brillo interior */
+    drawHeart(hCtx, cx, cy, currentS * 0.6, 'rgba(255,100,100,0.25)', 'transparent', 0);
+
+  } else {
+    /* FASE DE EXPANSIÓN — el corazón crece hasta cubrir toda la pantalla */
+    heart.scale = lerp(heart.scale, 50, 0.025);
+
+    const coverage = clamp((heart.scale - 1) / 49, 0, 1);
+
+    /* Fondo rojo que se extiende */
+    if (coverage > 0.1) {
+      hCtx.fillStyle = `rgba(120,15,20,${coverage * 0.9})`;
+      hCtx.fillRect(0, 0, W, H);
+    }
+
+    drawHeart(hCtx, cx, cy, heart.baseSize * heart.scale, '#c0392b', '#e74c3c', 40);
+
+    /* Cuando cubre todo, hacer transición */
+    if (coverage > 0.95 && !heart.done) {
+      heart.done = true;
+      transitionToLandscape();
+      return;
+    }
+  }
+
+  requestAnimationFrame(animateHeart);
+}
+
+/* Iniciar la animación del corazón con retardo suave */
+function startHeartIntro() {
+  animateHeart();
+}
+
+/* ==========================================================
+   TRANSICIÓN: CORAZÓN → PAISAJE
+   ========================================================== */
+function transitionToLandscape() {
+  const intro     = $('intro');
+  const landscape = $('landscape');
+
+  /* Fade del intro hacia afuera, paisaje hacia adentro */
+  setTimeout(() => {
+    intro.style.opacity = '0';
+    landscape.style.opacity = '1';
+
+    setTimeout(() => {
+      intro.style.display = 'none';
+      initLandscape();
+      startSigns();
+    }, 2000);
+  }, 300);
+}
+
+/* ==========================================================
+   SECCIÓN 2: PAISAJE NOCTURNO — CANVAS ANIMADO
+   ========================================================== */
+const lCanvas = $('landscapeCanvas');
+const lCtx    = lCanvas.getContext('2d');
+resizeCanvas(lCanvas);
+
+/* Estrellas generadas proceduralmente */
+const stars = [];
+function genStars(n) {
+  for (let i = 0; i < n; i++) {
+    stars.push({
+      x:       rand(0, lCanvas.width),
+      y:       rand(0, lCanvas.height * 0.55),
+      r:       rand(0.4, 2),
+      alpha:   rand(0.4, 1),
+      twinkle: rand(0, Math.PI * 2),
+      speed:   rand(0.005, 0.025),
+    });
+  }
+}
+
+/* Olas del río — múltiples capas de ondas sinusoidales */
+let riverOffset = 0;
+
+function drawLandscape(t) {
+  const W = lCanvas.width;
+  const H = lCanvas.height;
+  lCtx.clearRect(0, 0, W, H);
+
+  /* --- Cielo nocturno gradiente --- */
+  const sky = lCtx.createLinearGradient(0, 0, 0, H * 0.65);
+  sky.addColorStop(0,   '#050810');
+  sky.addColorStop(0.4, '#0a1428');
+  sky.addColorStop(0.7, '#0d1f3c');
+  sky.addColorStop(1,   '#152540');
+  lCtx.fillStyle = sky;
+  lCtx.fillRect(0, 0, W, H);
+
+  /* --- Luna con halo suave --- */
+  const moonX = W * 0.78;
+  const moonY = H * 0.15;
+  const halo  = lCtx.createRadialGradient(moonX, moonY, 0, moonX, moonY, 90);
+  halo.addColorStop(0,   'rgba(210,200,255,0.25)');
+  halo.addColorStop(0.4, 'rgba(180,170,240,0.08)');
+  halo.addColorStop(1,   'transparent');
+  lCtx.fillStyle = halo;
+  lCtx.beginPath();
+  lCtx.arc(moonX, moonY, 90, 0, Math.PI * 2);
+  lCtx.fill();
+
+  lCtx.shadowBlur  = 30;
+  lCtx.shadowColor = 'rgba(220,210,255,0.6)';
+  lCtx.beginPath();
+  lCtx.arc(moonX, moonY, 22, 0, Math.PI * 2);
+  lCtx.fillStyle = '#dbd5f5';
+  lCtx.fill();
+  lCtx.shadowBlur = 0;
+
+  /* --- Estrellas titilantes --- */
+  stars.forEach(s => {
+    s.twinkle += s.speed;
+    const tw = (Math.sin(s.twinkle) + 1) * 0.5;
+    const a  = s.alpha * (0.5 + tw * 0.5);
+
+    lCtx.shadowBlur  = tw * 8;
+    lCtx.shadowColor = `rgba(200,210,255,${a})`;
+    lCtx.beginPath();
+    lCtx.arc(s.x, s.y, s.r, 0, Math.PI * 2);
+    lCtx.fillStyle = `rgba(220,230,255,${a})`;
+    lCtx.fill();
+  });
+  lCtx.shadowBlur = 0;
+
+  /* --- Montañas lejanas (3 capas de profundidad) --- */
+  drawMountainLayer(lCtx, W, H, H * 0.45, '#0d1a30', 80,  0.0008, 0.4);
+  drawMountainLayer(lCtx, W, H, H * 0.52, '#0f2040', 50,  0.0012, 0.6);
+  drawMountainLayer(lCtx, W, H, H * 0.58, '#142850', 35,  0.0018, 0.8);
+
+  /* --- Área del río --- */
+  const riverTop = H * 0.62;
+
+  /* Reflejo de luna en agua */
+  const moonReflGrad = lCtx.createLinearGradient(moonX - 30, riverTop, moonX + 30, H);
+  moonReflGrad.addColorStop(0, 'rgba(180,170,240,0.2)');
+  moonReflGrad.addColorStop(0.5, 'rgba(150,140,210,0.08)');
+  moonReflGrad.addColorStop(1, 'transparent');
+  lCtx.fillStyle = moonReflGrad;
+  lCtx.fillRect(moonX - 60, riverTop, 120, H - riverTop);
+
+  /* Cuerpo del río */
+  const riverGrad = lCtx.createLinearGradient(0, riverTop, 0, H);
+  riverGrad.addColorStop(0, '#0d2040');
+  riverGrad.addColorStop(0.3, '#0a1a38');
+  riverGrad.addColorStop(1, '#061020');
+  lCtx.fillStyle = riverGrad;
+  lCtx.fillRect(0, riverTop, W, H - riverTop);
+
+  /* Ondas animadas del río — múltiples capas */
+  riverOffset += 0.4;
+  drawRiverWaves(lCtx, W, H, riverTop, riverOffset);
+
+  /* --- Orilla del río con plantas suaves --- */
+  drawRiverBank(lCtx, W, H, riverTop);
+
+  /* --- Iluminación rosada suave sobre el paisaje --- */
+  const pinkLight = lCtx.createRadialGradient(W * 0.3, riverTop, 0, W * 0.3, riverTop, W * 0.45);
+  pinkLight.addColorStop(0,   'rgba(220,130,160,0.06)');
+  pinkLight.addColorStop(0.5, 'rgba(180,100,140,0.03)');
+  pinkLight.addColorStop(1,   'transparent');
+  lCtx.fillStyle = pinkLight;
+  lCtx.fillRect(0, 0, W, H);
+}
+
+/* Dibuja una capa de montañas con ruido suave */
+function drawMountainLayer(ctx, W, H, baseY, color, amp, freq, phase) {
+  ctx.beginPath();
+  ctx.moveTo(0, H);
+  ctx.lineTo(0, baseY);
+  for (let x = 0; x <= W; x += 2) {
+    const y = baseY - Math.abs(
+      Math.sin(x * freq + phase) * amp +
+      Math.sin(x * freq * 2.3 + phase * 1.7) * (amp * 0.4) +
+      Math.sin(x * freq * 0.4 + phase * 0.5) * (amp * 0.7)
+    );
+    ctx.lineTo(x, y);
+  }
+  ctx.lineTo(W, H);
+  ctx.closePath();
+  ctx.fillStyle = color;
+  ctx.fill();
+}
+
+/* Ondas del río — efecto agua real con múltiples sinusoides */
+function drawRiverWaves(ctx, W, H, riverTop, offset) {
+  for (let layer = 0; layer < 5; layer++) {
+    const y0    = riverTop + layer * (H - riverTop) / 5;
+    const alpha = 0.03 + layer * 0.015;
+    const amp   = 2 + layer * 0.8;
+    const freq  = 0.015 - layer * 0.001;
+    const spd   = 1 + layer * 0.3;
+
+    ctx.beginPath();
+    ctx.moveTo(0, y0);
+    for (let x = 0; x <= W; x += 3) {
+      const y = y0 +
+        Math.sin(x * freq + offset * 0.04 * spd) * amp +
+        Math.sin(x * freq * 2.1 - offset * 0.025 * spd) * (amp * 0.5);
+      ctx.lineTo(x, y);
+    }
+    ctx.strokeStyle = `rgba(140,170,220,${alpha})`;
+    ctx.lineWidth   = 1.2;
+    ctx.stroke();
+  }
+
+  /* Destellos de luz en el agua */
+  for (let i = 0; i < 8; i++) {
+    const rx = W * (0.1 + i * 0.11);
+    const ry = riverTop + (H - riverTop) * (0.1 + (i % 3) * 0.25);
+    const glow = ctx.createRadialGradient(rx, ry, 0, rx, ry, 25);
+    glow.addColorStop(0,   `rgba(200,210,255,${0.12 + Math.sin(offset * 0.06 + i) * 0.06})`);
+    glow.addColorStop(1,   'transparent');
+    ctx.fillStyle = glow;
+    ctx.fillRect(rx - 25, ry - 10, 50, 20);
+  }
+}
+
+/* Orilla del río con hierba/plantas suaves */
+function drawRiverBank(ctx, W, H, riverTop) {
+  ctx.beginPath();
+  ctx.moveTo(0, H);
+  ctx.lineTo(0, riverTop);
+  const bankH = 18;
+  for (let x = 0; x <= W; x += 2) {
+    ctx.lineTo(x, riverTop - bankH * Math.abs(Math.sin(x * 0.02)) * 0.3);
+  }
+  ctx.lineTo(W, H);
+  ctx.closePath();
+  ctx.fillStyle = 'rgba(12,30,55,0.8)';
+  ctx.fill();
+}
+
+/* Bucle del paisaje */
+let landscapeRunning = false;
+function initLandscape() {
+  genStars(180);
+  landscapeRunning = true;
+  animateLandscape(0);
+  initParticles();
+}
+
+function animateLandscape(t) {
+  if (!landscapeRunning) return;
+  drawLandscape(t);
+  requestAnimationFrame(animateLandscape);
+}
+
+/* ==========================================================
+   PARTÍCULAS FLOTANTES
+   ========================================================== */
+const pCanvas = $('particleCanvas');
+const pCtx    = pCanvas.getContext('2d');
+resizeCanvas(pCanvas);
+
+const particles = [];
+function spawnParticle() {
+  particles.push({
+    x:     rand(0, pCanvas.width),
+    y:     rand(pCanvas.height * 0.3, pCanvas.height),
+    r:     rand(0.8, 2.5),
+    vx:    rand(-0.3, 0.3),
+    vy:    rand(-0.6, -0.2),
+    alpha: rand(0.3, 0.9),
+    life:  0,
+    maxLife: rand(180, 340),
+    hue:  rand(200, 330),
+  });
+}
+
+function animateParticles() {
+  if (!landscapeRunning) return;
+  pCtx.clearRect(0, 0, pCanvas.width, pCanvas.height);
+
+  if (Math.random() < 0.15) spawnParticle();
+
+  particles.forEach((p, i) => {
+    p.life++;
+    p.x += p.vx;
+    p.y += p.vy;
+    const lifeRatio = p.life / p.maxLife;
+    const fade = lifeRatio < 0.1 ? lifeRatio * 10 : lifeRatio > 0.8 ? (1 - lifeRatio) * 5 : 1;
+
+    pCtx.shadowBlur  = 8;
+    pCtx.shadowColor = `hsla(${p.hue},70%,70%,${p.alpha * fade})`;
+    pCtx.beginPath();
+    pCtx.arc(p.x, p.y, p.r, 0, Math.PI * 2);
+    pCtx.fillStyle = `hsla(${p.hue},70%,85%,${p.alpha * fade})`;
+    pCtx.fill();
+
+    if (p.life >= p.maxLife) particles.splice(i, 1);
+  });
+  pCtx.shadowBlur = 0;
+
+  requestAnimationFrame(animateParticles);
+}
+
+function initParticles() {
+  animateParticles();
+}
+
+/* ==========================================================
+   LETREROS ROMÁNTICOS — SECUENCIA TEMPORAL
+   ========================================================== */
+const phrases = [
+  "Sabes mi amor… 🤍",
+  "Te fallé, lo sé 💔",
+  "No te di mi tiempo 😔",
+  "Fui un tonto contigo 🥺",
+  "Te lastimé sin querer 💧",
+  "Eso me rompe el alma 😞",
+  "Perdón, de verdad 🙏",
+  "No merecías ese dolor ❤️‍🩹",
+  "Eres lo más especial 🌙",
+  "Ya no quiero fallarte ✨",
+  "Te volvería a elegir 💫",
+  "Eres mi lugar seguro 🕊️",
+  "Mi corazón te encontró 💗",
+  "Contigo tengo paz 🌊",
+  "Siempre serás especial 🌹",
+];
+
+let signIdx = 0;
+const signEl   = $('currentSign');
+const signText = $('signText');
+
+function showSign(index) {
+  if (index >= phrases.length) {
+    /* Todos los letreros mostrados — revelar sección final */
+    setTimeout(showFinalSection, 800);
+    return;
+  }
+
+  signText.textContent = phrases[index];
+  signEl.classList.remove('hiding');
+  signEl.classList.add('visible');
+
+  /* Mantener el letrero visible ~3 segundos, luego hacer fade */
+  setTimeout(() => {
+    signEl.classList.remove('visible');
+    signEl.classList.add('hiding');
+
+    setTimeout(() => {
+      signEl.classList.remove('hiding');
+      showSign(index + 1);
+    }, 1200); /* Tiempo de desvanecimiento */
+
+  }, 3200);
+}
+
+function startSigns() {
+  /* Pequeña espera inicial para que el paisaje se forme */
+  setTimeout(() => showSign(0), 1500);
+}
+
+/* ==========================================================
+   SECCIÓN FINAL — TEXTO LUMINOSO
+   ========================================================== */
+function showFinalSection() {
+  const fs = $('finalSection');
+  /* Ocultar signContainer */
+  $('signContainer').style.opacity = '0';
+  fs.classList.add('visible');
+}
+
+/* ==========================================================
+   CARTA DE AMOR — APERTURA ANIMADA
+   ========================================================== */
+function openLetter() {
+  const overlay = $('letterOverlay');
+  const card    = $('letterCard');
+
+  overlay.classList.add('open');
+  /* Pequeño delay para que la transición de opacidad del overlay empiece */
+  setTimeout(() => card.classList.add('open'), 100);
+}
+
+/* Cerrar carta al hacer clic fuera */
+$('letterOverlay').addEventListener('click', function(e) {
+  if (e.target === this) {
+    $('letterCard').classList.remove('open');
+    setTimeout(() => this.classList.remove('open'), 500);
+  }
+});
+
+/* ==========================================================
+   VIDEO + OJITOS DE ANIMALITOS
+   ========================================================== */
+function startVideo() {
+  /* Cerrar carta */
+  $('letterCard').classList.remove('open');
+  setTimeout(() => {
+    $('letterOverlay').classList.remove('open');
+  }, 400);
+
+  /* Activar sección de video */
+  const vs = $('videoSection');
+  vs.classList.add('active');
+
+  /* Reproducir el video local DEDICAR.mp4
+     Quitamos muted para que se escuche el audio del video */
+  const vid = $('bgVideo');
+  vid.muted = false;
+  vid.volume = 1;
+  vid.currentTime = 0;
+  vid.play().catch(err => console.warn('Video error:', err));
+
+}
+
+/* ==========================================================
+   RESIZE — mantener todos los canvas actualizados
+   ========================================================== */
+window.addEventListener('resize', () => {
+  resizeCanvas(heartCanvas);
+  resizeCanvas(lCanvas);
+  resizeCanvas(pCanvas);
+  heart.baseSize = Math.min(window.innerWidth, window.innerHeight) * 0.25;
+  if (stars.length > 0) {
+    stars.length = 0;
+    genStars(180);
+  }
+});
+
+/* ==========================================================
+   MÚSICA DE FONDO LOCAL — DESPACIO.mp3
+   startBackgroundMusic() se llama al presionar "Comenzar"
+   El audio ya está desbloqueado por el gesto del usuario
+   ========================================================== */
+let musicStarted = false;
+
+function startBackgroundMusic() {
+  if (musicStarted) return;
+  musicStarted = true;
+
+  const bgMusic = $('bgMusic');
+  bgMusic.volume = 0;
+  bgMusic.play().catch(err => console.warn('Audio:', err));
+
+  /* Fade in gradual ~3 segundos hasta volumen 0.8 */
+  let vol = 0;
+  const fadeIn = setInterval(() => {
+    vol = Math.min(vol + 0.02, 0.8);
+    bgMusic.volume = vol;
+    if (vol >= 0.8) clearInterval(fadeIn);
+  }, 75);
+}
+
+function stopBackgroundMusic() {
+  const bgMusic = $('bgMusic');
+  /* Fade out suave y luego pausa */
+  let vol = bgMusic.volume;
+  const fadeOut = setInterval(() => {
+    vol = Math.max(vol - 0.04, 0);
+    bgMusic.volume = vol;
+    if (vol <= 0) {
+      clearInterval(fadeOut);
+      bgMusic.pause();
+      bgMusic.currentTime = 0;
+    }
+  }, 50);
+}
+
+/* ==========================================================
+   PANTALLA DE INICIO — TAP TO BEGIN
+   El usuario debe interactuar primero para desbloquear audio
+   ========================================================== */
+const startScreen = $('startScreen');
+
+startScreen.addEventListener('click', () => {
+  /* 1. Fade out de la pantalla de inicio */
+  startScreen.classList.add('hidden');
+
+  /* 2. Iniciar música de fondo */
+  startBackgroundMusic();
+
+  /* 3. Después de que desaparece el overlay, arrancar la experiencia */
+  setTimeout(() => {
+    startScreen.style.display = 'none';
+    startHeartIntro();
+  }, 1300);
+});
+
+/* También funciona con teclado (accesibilidad) */
+startScreen.addEventListener('keydown', e => {
+  if (e.key === 'Enter' || e.key === ' ') startScreen.click();
+});
+startScreen.setAttribute('tabindex', '0');
+
+/* ==========================================================
+   PARAMOS LA MÚSICA DE FONDO CUANDO EMPIEZA EL VIDEO FINAL
+   ========================================================== */
+const _origStartVideo = startVideo;
+/* Sobrescribimos startVideo para detener música antes del video */
+window.startVideo = function() {
+  stopBackgroundMusic();
+  /* Pequeño delay para que el fade sea suave antes del video */
+  setTimeout(() => _origStartVideo(), 800);
+};
+
+/* Actualizar el botón de la carta para usar la función corregida */
+document.addEventListener('DOMContentLoaded', () => {
+  const btnPlay = document.querySelector('.btn-play');
+  if (btnPlay) btnPlay.onclick = () => window.startVideo();
+});
+
+/* ==========================================================
+   INICIO — el load solo prepara el canvas; el usuario
+   arranca la experiencia tocando la pantalla de inicio
+   ========================================================== */
+window.addEventListener('load', () => {
+  /* Pre-dibujar el corazón en estado inicial para que no haya salto */
+  resizeCanvas(heartCanvas);
+});
+</script>
+</body>
+</html>
